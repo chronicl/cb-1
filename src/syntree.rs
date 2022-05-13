@@ -14,15 +14,23 @@ pub struct Syntree<T> {
 // Hint: Start with seek_node_mut
 impl<'a, T> Syntree<T> {
     pub fn new(value: T, id: ID) -> Syntree<T> {
-        todo!()
+        Self {
+            id,
+            value,
+            children: Vec::new(),
+        }
     }
 
     pub fn push_node(&mut self, parent_id: ID, new_node: Syntree<T>) -> Result<(), String> {
-        todo!()
+        self.seek_node_mut(&parent_id)
+            .ok_or("Parent not found".to_owned())?
+            .children
+            .push(new_node);
+        Ok(())
     }
 
     pub fn prepend_node(&mut self, parent_id: ID, new_node: Syntree<T>) -> Result<(), String> {
-        todo!()
+        self.insert_node(parent_id, 0, new_node)
     }
 
     pub fn insert_node(
@@ -31,7 +39,11 @@ impl<'a, T> Syntree<T> {
         index: usize,
         new_node: Syntree<T>,
     ) -> Result<(), String> {
-        todo!()
+        self.seek_node_mut(&parent_id)
+            .ok_or("Parent not found".to_owned())?
+            .children
+            .insert(index, new_node);
+        Ok(())
     }
 
     // Anmerkung: `'a` Is ein Lebenszeit angabe für die Referenzen
@@ -50,7 +62,16 @@ impl<'a, T> Syntree<T> {
     }
 
     pub fn seek_node_mut(&'a mut self, id: &ID) -> Option<&'a mut Syntree<T>> {
-        todo!()
+        if self.id == *id {
+            Some(self)
+        } else {
+            for child in self.children.iter_mut() {
+                if let Some(result) = child.seek_node_mut(id) {
+                    return Some(result);
+                }
+            }
+            None
+        }
     }
 }
 
